@@ -19,17 +19,6 @@ max_t <- 100
 pairs <- which(day_diff <= max_t & upper.tri(day_diff), arr.ind = T)
 lag <- apply(pairs, 1, function(z) day_diff[z[1],z[2]] )
 
-year1 <- format(all_dates[pairs[,1]],"%Y")
-year2 <- format(all_dates[pairs[,1]],"%Y")
-
-N <- sapply(1:length(year1), function(z){
-  y1 <- year1[z]
-  y2 <- year2[z]
-  with(attributes, sum(Population..N..Northern..S...Southern. == "S" &
-                         yob < y1 &
-                         (is.na(yod) | yod > y2)))
-})
-
 m <- ni <- nj <- NA
 
 for(p in 1:nrow(pairs)){
@@ -39,6 +28,8 @@ for(p in 1:nrow(pairs)){
   ni[p] <- sum(sighting_matrix[i,])
   nj[p] <- sum(sighting_matrix[k,])
 }
+
+n <- ni+nj
 
 data <- data.frame(m,lag,ni,nj)
 
