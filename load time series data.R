@@ -69,6 +69,14 @@ pod <- as.numeric(as.factor(sapply(mats, function(z){
   unique(substr(colnames(kin)[matriline == z],1,1))
 })))
 
+# get J pod presence
+
+jpod <- matrix(0, nrow = length(years), ncol = length(unique_days))
+for(i in 1:length(years)){
+  jpod[i,] <- rowSums(mat_sightings[i,,pod == 1])
+}
+jpod[jpod > 0] <- 1
+
 # Get the salmon data
 
 time_lag <- 10 # define the lag between salmon and whale data (10 days has been used before)

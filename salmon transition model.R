@@ -68,9 +68,11 @@ salmon_model_string <- "model{
   
   detect_prob[1] <- pd
   detect_prob[2] <- 0
-  pd ~ dunif(0,1)
+  pd ~ dbeta(2,2)
   
   # set up year and matriline specific transistion matrices
+  
+  mu.lam <- mean(lambda)
   
   for(t in 1:Yrs){
     for(i in 1:Nday){
@@ -96,12 +98,12 @@ salmon_model_string <- "model{
 # Currently subsetted for testing, but will eventually include all the data
 
 jags_data <- list(
-  Yrs = 20,
-  Nday = 100,
+  Yrs = length(years),
+  Nday = 50,
   Nmat = length(mats),
-  detection = mat_sightings[1:20,1:100,],
-  catch = salmon_catch[1:20,1:100],
-  effort = salmon_effort[1:20,1:100]
+  detection = mat_sightings[,25:74,],
+  catch = salmon_catch[,25:74],
+  effort = salmon_effort[,25:74]
 )
 
 # Run the model, recording the population-level intercepts for (logit-transformed) leaving and arrival probabilities, and (non-transformed) detection probabilities

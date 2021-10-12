@@ -34,7 +34,7 @@ simple_model_string <- "model{
   
   detect_prob[1] <- pd
   detect_prob[2] <- 0
-  pd ~ dunif(0,1)
+  pd ~ dbeta(2,2)
   
   # set up year and matriline specific transistion matrices
   
@@ -52,15 +52,19 @@ simple_model_string <- "model{
 # Currently subsetted for testing, but will eventually include all the data
 
 jags_data <- list(
-  Yrs = length(years),
+  Yrs = 10,
   Nday = 50,
-  Nmat = length(mats),
-  detection = mat_sightings[,1:50,]
+  Nmat = 5,
+  detection = mat_sightings[1:10,20:69,1:5]
 )
 
-# Run the model, recording the population-level intercepts for (logit-transformed) leaving and arrival probabilities, and (non-transformed) detection probabilities
+# Run the model, recording the population-level intercepts for leaving and arrival probabilities, and detection probabilities
 
-simple_run <- run.jags(simple_model_string, data = jags_data, monitor = c("pleave","parrive","detect_prob[1]"), sample = 1000, burnin = 1000)
+start <- Sys.time()
+simple_run <- run.jags(simple_model_string, data = jags_data, monitor = c("pleave","parrive","detect_prob[1]"), sample = 1000, burnin = 1000, n.chains = 4)
+end <- Sys.time()
+
+end - start
 
 summary(simple_run)
 plot(simple_run$mcmc)
