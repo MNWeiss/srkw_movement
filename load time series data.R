@@ -21,8 +21,11 @@ raw_data <- raw_data[any_srkw & format(raw_data$Date, "%Y") %in% years,] # subse
 
 # Get all the dates we're interested (every day from 1st April to 31st October in each year)
 
-all_date <- seq(as.Date(paste(min(years),"-05-01",sep="")),as.Date(paste(max(years),"-9-30",sep="")),1)
-all_date <- all_date[as.numeric(format(all_date,"%m")) %in% 5:9]
+# all_date <- seq(as.Date(paste(min(years),"-05-01",sep="")),as.Date(paste(max(years),"-9-30",sep="")),1)
+all_date <- seq(as.Date(paste(min(years),"-04-17",sep="")),as.Date(paste(max(years),"-9-30",sep="")),1)
+# all_date <- all_date[as.numeric(format(all_date,"%m")) %in% 5:9]
+all_date <- all_date[as.numeric(format(all_date,"%m")) %in% 5:9 | 
+                       as.numeric(format(all_date, "%m")) == 4 & as.numeric(format(all_date, "%d")) >= 17]
 
 unique_days <- sort(unique(format(all_date, "%m-%d")))
 
@@ -62,6 +65,12 @@ for(t in 1:length(years)){
     }
   }
 }
+
+
+pre_mat_sightings = mat_sightings[,1:15,] # 14 days pre true start + day one
+mat_sightings = mat_sightings[,15:length(unique_days),] # correct back to onkly having from start date
+sighting_matrix = sighting_matrix[,15:length(unique_days),] #same
+unique_days = unique_days[15:length(unique_days)] #same
 
 # get each matriline's pod identity
 
