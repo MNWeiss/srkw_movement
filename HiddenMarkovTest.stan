@@ -59,9 +59,9 @@ transformed parameters {
 
 
 model {
-  pd ~ normal(0, 10);
-  parrive ~ normal(0, 10);
-  pleave ~ normal(0, 10);
+  pd ~ beta(2, 10);
+  parrive ~  beta(2, 10); //loosen this with more data
+  pleave ~ beta(2, 10); // loosen this with more data 
 
   rho ~ dirichlet([10, 1, 1]);
 
