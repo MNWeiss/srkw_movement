@@ -10,14 +10,15 @@ require(rethinking)
 source("load time series data.R")
 
 jags_data_simple <- list(
-  D = 153,
-  M = 37,
-  y = mat_sightings[1,1:153,1:37]
+  D = 60,
+  M = 5,
+  Y = 2,
+  S = mat_sightings[1:2,1:60,1:5]
 )
 
 
 mod = cmdstan_model(
-  stan_file = "HiddenMarkovTest2.stan"
+  stan_file = "HiddenMarkov_Simple.stan"
 )
 
 fit = mod$sample(data = jags_data_simple, parallel_chains = 4)
@@ -30,7 +31,7 @@ fit = mod$sample(data = jags_data_simple, parallel_chains = 4)
 stanfit <- rstan::read_stan_csv(fit$output_files())
 activepars = c("pd", "parrive", "pleave", "mu[3]")
 traceplot(stanfit, pars = activepars)
-precis(stanfit, depth = 2)
+precis(stanfit, depth = 3)
 
 
 
@@ -40,14 +41,14 @@ hidden_probs_df = fit$draws() %>%
   as_draws_df %>%
   select(starts_with("hidden_probs")) %>%
   pivot_longer(everything(),
-               names_to = c("mat","state", "d"),
-               names_transform = list(mat = as.integer, state = as.factor, d = as.integer),
-               names_pattern = "hidden_probs\\[([0-9]*),([0-9]*),([0-9]*)\\]",
+               names_to = c("year", "mat","state", "d"),
+               names_transform = list(year = as.integer, mat = as.integer, state = as.factor, d = as.integer),
+               names_pattern = "hidden_probs\\[([0-9]*),([0-9]*),([0-9]*),([0-9]*)\\]",
                values_to = "hidden_probs")
 
 
 hidden_probs_df %>%
-  group_by(mat, state, d) %>%
+  group_by(year, mat, state, d) %>%
   summarize(qh = quantile(hidden_probs, 0.8),
             m = median(hidden_probs),
             ql = quantile(hidden_probs, 0.2)) %>%
@@ -57,7 +58,7 @@ hidden_probs_df %>%
   ggplot(aes(x = d, y = m, fill = state)) +
   geom_bar(stat = "identity")+
   theme_bw() +
-  facet_wrap(mat ~ .)
+  facet_wrap(year~mat)
 
 # hidden_probs_df %>%
 #   group_by(mat, state, d) %>%
