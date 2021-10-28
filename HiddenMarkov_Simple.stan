@@ -1,12 +1,8 @@
-// #### TO DO
-//  # add new years indexing level
-//  # sort out rho so it varies by matriline per year
-
 data {
   int D; // Number of observations
-  int M;
-  int Y;
-  int S[Y,D, M];
+  int M; //Number of matrilines
+  int Y; //number of years
+  int S[Y,D, M]; //sightings matrix
 }
 
 parameters {
