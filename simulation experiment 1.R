@@ -1,3 +1,6 @@
+require(rjags)
+require(runjags)
+
 N <- 10
 t <- 200
 
@@ -72,5 +75,4 @@ jags_data <- list(
 
 # Run the model, recording the population-level intercepts for leaving and arrival probabilities, and detection probabilities
 
-simple_run <- run.jags(simple_model_string, data = jags_data, monitor = c("pleave","parrive","detection_prob"), sample = 20000, burnin = 1000, n.chains = 4)
-plot(simple_run)
+simple_run <- run.jags(simple_model_string, data = jags_data, monitor = c("pleave","parrive","detection_prob","state"), sample = 20000, burnin = 1000, n.chains = 4)

@@ -57,7 +57,17 @@ sighting_matrix <- sighting_matrix[,,colnames(kin)]
 matriline <- igraph::components(graph.adjacency(ifelse(kin > 0, 1, 0)))$membership
 mats <- 1:max(matriline)
 
+yob <- attributes$yob[match(colnames(kin), attributes$id)]
+yod <- attributes$yod[match(colnames(kin), attributes$id)]
+
+mat_size <- sapply(years, function(y){
+  sapply(mats, function(m){
+    sum(yob <= y & (is.na(yod) | yod >= y) & matriline == m)
+  })
+})
+
 mat_sightings <- array(0, dim = c(length(years),length(unique_days),length(mats)))
+mat_extant <- t(ifelse(mat_size > 0, 1, 0))
 for(t in 1:length(years)){
   for(i in 1:length(unique_days)){
     for(j in 1:length(mats)){

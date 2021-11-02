@@ -5,6 +5,7 @@ data {
   int M; //Number of matrilines
   int Y; //number of years
   int S[Y,D, M]; //sightings matrix
+  int<lower = 0, upper = 1> S_extant[Y,M]; // whether each matriline is extant in each year
   
   //salmon model parameters
   int salmon_N;
@@ -19,7 +20,8 @@ data {
 parameters {
   
   // Parameters of state model
-  real<lower = 0, upper = 0.5> pd;
+  real<lower = 0, upper = 1> pd2;
+  real<lower = 0, upper = 1> pd3;
   simplex[3] rho[Y,M]; // Initial state
   real<lower = 0, upper = 0.5> parrive;
   real<lower = 0, upper = 0.5> pleave;
@@ -58,10 +60,8 @@ transformed parameters {
   t3[2] = 1 - pleave;
   
   mu[1] = 0;
-  mu[2] = 1;
-  mu[3] = pd;
-  
-  
+  mu[2] = pd2;
+  mu[3] = pd3;
   
   // Build the transition matrix
   Gamma[1, 1:2] = t1';
@@ -73,13 +73,13 @@ transformed parameters {
   // Compute the log likelihoods in each possible state
   for(y in 1:Y){
     for(m in 1:M){
-      for(d in 1:D) {
-      // The observation model could change with n, or vary in a number of
-      //  different ways (which is why log_omega is passed in as an argument)
-    log_omega[y, m, 1, d] = bernoulli_lpmf(S[y, d, m] | mu[1]);
-    log_omega[y, m, 2, d] = bernoulli_lpmf(S[y, d, m] | mu[2]);
-    log_omega[y, m, 3, d] = bernoulli_lpmf(S[y, d, m] | mu[3]);
-    }
+       for(d in 1:D) {
+        // The observation model could change with n, or vary in a number of
+        //  different ways (which is why log_omega is passed in as an argument)
+        log_omega[y, m, 1, d] = bernoulli_lpmf(S[y, d, m] | mu[1]);
+        log_omega[y, m, 2, d] = bernoulli_lpmf(S[y, d, m] | mu[2]);
+        log_omega[y, m, 3, d] = bernoulli_lpmf(S[y, d, m] | mu[3]);
+      } 
   }
   }
 
@@ -91,7 +91,8 @@ model {
   // THE STATE MODEL
   
   //declare
-  pd ~ normal(0.25, 10); // Uniform priors seem to make it struggle to initialise. 
+  pd2 ~ beta(49,1);
+  pd3 ~ normal(0.25, 10); // Uniform priors seem to make it struggle to initialise. 
   parrive ~  normal(0.25, 10); 
   pleave ~ normal(0.25, 10); 
   
@@ -103,7 +104,9 @@ model {
   //Model
   for(y in 1:Y){
     for(m in 1:M){
-      target += hmm_marginal(log_omega[y, m, ,], Gamma, rho[y,m,]);
+      if(S_extant[y,m]){
+        target += hmm_marginal(log_omega[y, m, ,], Gamma, rho[y,m,]);
+      }
     } 
   }
   
@@ -156,6 +159,8 @@ generated quantities {
   //The STATE MODEL
   matrix[3,D] hidden_probs[Y,M];
   int y_sim[Y, M, D];
+  real<lower = 0, upper = 1> present[Y, M, D];
+  
   for(y in 1:Y){
     for(m in 1:M){
       hidden_probs[y,m,,] = hmm_hidden_state_prob(log_omega[y,m,,], Gamma, rho[y,m,]);
@@ -163,9 +168,16 @@ generated quantities {
     }
   }
   
+  for(y in 1:Y){
+    for(m in 1:M){
+      for(d in 1:D){
+        present[y,m,d] = y_sim[y,m,d] > 1;
+      }
+    }
+  }
   
   // THE SALMON MODEL
-  matrix[Y,D] log_lam;
+  real log_lam[Y,D];
   real D_seq[D];
   for(d in 1:D){
     D_seq[d] = d*1.0/D;
@@ -174,7 +186,31 @@ generated quantities {
   for(y in 1:Y){
       for(d in 1:D){
         log_lam[y,d] = b0[y] + b1[y]*D_seq[d] + b2[y]*D_seq[d]^2 + b3[y]*D_seq[d]^3 + b4[y]*D_seq[d]^4+err[y,d];
-        }
       }
+  }
+  
+  // Combining models
+  
+  real mat_salmon[Y,M];
+  real avg_salmon[Y];
+  real mat_lam[Y,M,D];
+  
+  for(y in 1:Y){
+    avg_salmon[y] = mean(exp(log_lam[y,]));
+  }
+  
+  for(y in 1:Y){
+    for(m in 1:M){
+      for(d in 1:D){
+        mat_lam[y,m,d] = exp(log_lam[y,d])*present[y,m,d];
+      }
+    }
+  }
+  
+  for(y in 1:Y){
+    for(m in 1:M){
+      mat_salmon[y,m] = sum(mat_lam[y,m,])/sum(present[y,m,]);
+    }
+  }
 
 }

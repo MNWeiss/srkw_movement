@@ -7,7 +7,8 @@ data {
 
 parameters {
   // Parameters of measurement model
-  real<lower = 0, upper = 0.5> pd;
+  real<lower = 0, upper = 1> pd2;
+  real<lower = 0, upper = 1> pd3;
   
   // Initial state
   simplex[3] rho[Y,M];
@@ -36,10 +37,8 @@ transformed parameters {
   t3[2] = 1 - pleave;
   
   mu[1] = 0;
-  mu[2] = 1;
-  mu[3] = pd;
-  
-  
+  mu[2] = pd2;
+  mu[3] = pd3;
   
   // Build the transition matrix
   Gamma[1, 1:2] = t1';
@@ -69,7 +68,8 @@ model {
   // pd ~ beta(2, 10);
   // parrive ~  beta(2, 10); //loosen this with more data
   // pleave ~ beta(2, 10); // loosen this with more data 
-  pd ~ normal(0.25, 10); // Uniform priors seem to make it struggle to initialise. 
+  pd3 ~ normal(0.25, 10); // Uniform priors seem to make it struggle to initialise.
+  pd2 ~ beta(20,1);
   parrive ~  normal(0.25, 10); 
   pleave ~ normal(0.25, 10); 
   

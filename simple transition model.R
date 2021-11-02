@@ -14,8 +14,9 @@ simple_model_string <- "model{
       }
   }
   
-  init_p[1] <- parrive/(pleave+parrive) # assign initial state probabilities as the steady state probabilities from the transition matrix
-  init_p[2] <- pleave/(pleave+parrive)
+  init_p[1:2] ~ ddirch(a[1:2])
+  a[1] <- pleave/(parrive+pleave)
+  a[2] <- parrive/(parrive+pleave)
   
   # Transition model
   
@@ -32,39 +33,41 @@ simple_model_string <- "model{
   
   # Detection probability prior
   
-  detect_prob[1] <- pd
-  detect_prob[2] <- 0
-  pd ~ dbeta(2,2)
+  detect_prob[1] <- 0
+  detect_prob[2] <- pd
+
+  pd ~ dunif(0,1)
   
   # set up year and matriline specific transistion matrices
   
-  ptran[1,1] <- 1 - pleave # probability of staying is 1 - the probability of leaving
-  ptran[1,2] <- pleave # probability of transitioning from present to absent is just the probability of leaving
-  ptran[2,1] <- parrive # probability of arriving
-  ptran[2,2] <- 1 - parrive # probability of staying gone is 1 - probability of arriving
-  
-  pleave ~ dunif(0,1)
-  parrive ~ dunif(0,1)
+  ptran[1,1] <- 1-parrive
+  ptran[1,2] <- parrive
+  ptran[2,1] <- pleave
+  ptran[2,2] <- 1-pleave
+
+  pleave ~ dunif(0,0.5)
+  parrive ~ dunif(0,0.5)
 
 }"
+
 
 # Set up the data
 # Currently subsetted for testing, but will eventually include all the data
 
 jags_data <- list(
-  Yrs = 10,
-  Nday = 50,
-  Nmat = 5,
-  detection = mat_sightings[1:10,20:69,1:5]
+  Yrs = length(years),
+  Nday = length(unique_days),
+  Nmat = length(mats),
+  detection = mat_sightings
 )
 
 # Run the model, recording the population-level intercepts for leaving and arrival probabilities, and detection probabilities
 
 start <- Sys.time()
-simple_run <- run.jags(simple_model_string, data = jags_data, monitor = c("pleave","parrive","detect_prob[1]"), sample = 1000, burnin = 1000, n.chains = 4)
+simple_run <- run.jags(simple_model_string, data = jags_data, monitor = c("pleave","parrive","detect_prob","state"), sample = 500000, burnin = 1000, n.chains = 4)
 end <- Sys.time()
 
 end - start
 
 summary(simple_run)
-plot(simple_run$mcmc)
+plot(simple_run)
