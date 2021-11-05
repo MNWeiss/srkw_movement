@@ -91,7 +91,7 @@ model {
   // THE STATE MODEL
   
   //declare
-  pd2 ~ beta(49,1);
+  pd2 ~ uniform(0.9,1);
   pd3 ~ normal(0.25, 10); // Uniform priors seem to make it struggle to initialise. 
   parrive ~  normal(0.25, 10); 
   pleave ~ normal(0.25, 10); 
