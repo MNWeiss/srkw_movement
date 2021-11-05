@@ -37,8 +37,8 @@ mod_data <- list(
   salmon_effort = salmon.df$effort
 )
 
-# set_cmdstan_path("C:/Users/mw607/cmdstan-2.28.1")
-set_cmdstan_path("D:/cmdstan/cmdstan-2.28.1")
+set_cmdstan_path("C:/Users/mw607/cmdstan-2.28.1")
+# set_cmdstan_path("D:/cmdstan/cmdstan-2.28.1")
 
 mod <- cmdstan_model(
   stan_file = "StatesandSalmon SIMPLE.stan"
