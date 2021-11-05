@@ -47,11 +47,11 @@ mod <- cmdstan_model(
 # fit <- mod$sample(data = mod_data, iter_warmup = 250, iter_sampling = 250, parallel_chains = 4)
 
 ## THIS WORKS. 500 model outputs log_omega and y_sim
-fit <- mod$variational(data = mod_data, output_samples = 500)
+fit <- mod$variational(data = mod_data, output_samples = 250)
 
-A <- fit$draws() %>%
+post.draws <- fit$draws() %>%
   as_draws_df
 
-
+saveRDS(post.draws, "post.draws_var250.RDS")
 # stanfit <- rstan::read_stan_csv(fit$output_files())
 
