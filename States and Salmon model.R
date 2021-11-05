@@ -53,5 +53,6 @@ post.draws <- fit$draws() %>%
   as_draws_df
 
 saveRDS(post.draws, "post.draws_var250.RDS")
+
 # stanfit <- rstan::read_stan_csv(fit$output_files())
 
