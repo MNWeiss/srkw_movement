@@ -35,6 +35,7 @@ year <- format(raw_data$Date, "%Y")
 # Get all the IDs
 
 all_ids <- sort(unique(unlist(raw_data$IDs)))
+all_ids <- all_ids[all_ids %in% attributes$id]
 
 # Set up an array for sightings; each slice represents a year, and ye
 
@@ -46,6 +47,9 @@ for(i in 1:length(years)){
   for(j in 1:length(unique_days)){
     if(any(day_month == unique_days[j] & year == years[i])){
       ids <- unique(unlist(raw_data$IDs[day_month == unique_days[j] & year == years[i]]))
+      yob.i <- attributes$yob[match(ids,attributes$id)] # YOB for individuals recorded
+      yod.i <- attributes$yod[match(ids,attributes$id)] # YOD for individuals recorded
+      ids <- ids[ids %in% attributes$id & yob.i <= years[i] & (is.na(yod.i) | yod.i >= years[i])] # Subset to individuals that are in the attributes data and could have been observed on that day (exclude errors)
       sighting_matrix[i,j,ids] <- 1
     }
   }
