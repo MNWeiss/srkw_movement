@@ -32,6 +32,7 @@ matriline_data <- do.call(rbind,matriline_data)
 matriline_data <- matriline_data[matriline_data$mat_size > 0,]
 matriline_data$pod <- as.factor(matriline_data$pod)
 
-salmon_prf_model <- brm(salmon ~ has_prf + has_calf + has_am + mat_size + (1|mat_ID) + (1|year), data = matriline_data)
+salmon_prf_model <- brm(salmon ~ has_prf + mat_size + (1|mat_ID) + (1|year), data = matriline_data)
 
+plot(salmon_prf_model)
 summary(salmon_prf_model)
