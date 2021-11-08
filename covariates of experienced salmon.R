@@ -9,6 +9,7 @@ all_sex <- attributes$sex..0...females..1...males..2...uknown.[match(all_ids, at
 mat_salmon_mean <- apply(mat_salmon, c(2,3), median, na.rm = T)
 
 for(i in 1:length(years)){
+  age <- years[i] - yob
   is.prf <- ifelse(all_sex == 0 & (years[i] - yob) >= 45, 1, 0)
   is.am <- ifelse(all_sex == 1 & (years[i] - yob) >= 21, 1, 0)
   is.calf <- ifelse((years[i]-yob) <= 2, 1, 0)
@@ -25,14 +26,21 @@ for(i in 1:length(years)){
   has_calf <- sapply(mats, function(z){
     ifelse(any(is.calf == 1 & is.alive == 1 & matriline == z), 1, 0)
   })
-  matriline_data[[i]] <- data.frame(year = years[i], mat_ID = mats, pod  = pod, mat_size, has_prf, has_am, has_calf, salmon = mat_salmon_mean[i,])
+  age_oldest <- sapply(mats, function(z){
+    max(age[matriline == z & is.alive == 1])
+  })
+  age_oldest_f <- sapply(mats, function(z){
+    max(age[matriline == z & is.alive == 1 & all_sex == 0])
+  })
+  matriline_data[[i]] <- data.frame(year = years[i], mat_ID = mats, pod  = pod, mat_size, has_prf, has_am, has_calf, salmon = mat_salmon_mean[i,], age_oldest, age_oldest_f)
 }
 
 matriline_data <- do.call(rbind,matriline_data)
 matriline_data <- matriline_data[matriline_data$mat_size > 0,]
 matriline_data$pod <- as.factor(matriline_data$pod)
+matriline_data$age_oldest_f[is.infinite(matriline_data$age_oldest_f)] <- NA
 
-salmon_prf_model <- brm(salmon ~ has_prf + mat_size + (1|mat_ID) + (1|year), data = matriline_data)
+salmon_prf_model <- brm(salmon ~ scale(mat_size) + has_am + has_prf + has_calf + (1|mat_ID) + (1|year), data = matriline_data)
 
 plot(salmon_prf_model)
 summary(salmon_prf_model)
