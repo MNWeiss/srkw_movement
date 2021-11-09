@@ -95,6 +95,8 @@ deaths
 deaths.in = filter(deaths, year >1) # using year before salmon so can't use first year
 
 mat_salmonII = ifelse(is.nan(mat_salmon), 0, mat_salmon)
+mat_salmonII = colMeans(mat_salmonII, dims = 1) # for now done on the mean salmon. to be redone over the array in the furture
+mean_salmonII = rowMeans(mean_salmon)
 
 surv_mod_dat = list(
   
@@ -109,7 +111,7 @@ surv_mod_dat = list(
   Nyears = 33,
   Nmats = 37,
   mat_salmon = mat_salmonII,
-  mean_salmon = mean_salmon,
+  mean_salmon = mean_salmonII,
   mat_extant = mat_extant,
   
   mean_salmon_seq = seq(quantile(mean_salmon, 0.1), quantile(mean_salmon, 0.9), length.out = 100),
@@ -166,8 +168,8 @@ ggplot(filter(matsalmon.plot, sex == "F"), aes(mat_salmon, p.mean, colour = sex,
   scale_fill_manual(values = "firebrick4")+
   theme_bw() +
   theme(
-    axis.text = element_text(size = 20),
-    axis.title = element_text(size = 30),
+    axis.text = element_text(size = 30),
+    axis.title = element_text(size = 40),
     legend.position = "none"
   )
 

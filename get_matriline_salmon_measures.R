@@ -30,3 +30,64 @@ for(i in 1:dim(matriline_draws)[1]){
 }
 
 mat_salmon
+
+
+###Some plots
+
+salmon.plot.df = data.frame(
+  day = 1:153,
+  salmon.rate = exp(colMeans(salmon_array[,10,])),
+  lCI = exp(colQuantiles(salmon_array[,10,], prob = 0.05)),
+  uCI = exp(colQuantiles(salmon_array[,10,], prob = 0.95))
+  
+)
+ggplot(salmon.plot.df, aes(day, salmon.rate, colour = "a", fill = "a"))+
+  geom_line(size = 2)+
+  geom_ribbon(aes(ymin = lCI, ymax = uCI), alpha = 0.5, colour = NA)+
+  scale_colour_manual(values = "hotpink2")+
+  scale_fill_manual(values = "hotpink2")+
+  ylab("Salmon Rate") +
+  xlab("Julian Day")+
+  theme_bw()+
+  theme(
+    axis.text = element_text(size = 30),
+    axis.title = element_text(size = 40),
+    legend.position = "none"
+  )
+
+
+#
+state.eg.df = data.frame(
+  day = 1:153,
+  state = ifelse(matriline_array[1,10,1,] == 1, 0, 1)
+)
+ggplot(state.eg.df, aes(day, state))+
+  geom_line(size = 2)+
+  ylab("State") +
+  xlab("Julian Day")+
+  theme_bw()+
+  theme(
+    axis.text.x = element_text(size = 30),
+    axis.text.y = element_text(size = 0),
+    axis.title = element_text(size = 40),
+    legend.position = "none"
+  )
+
+
+mat.salmon.eg = data.frame(
+  mat = seq(1, 37,1),
+  salmon.achieved = colMeans(mat_salmon, dim = 1)[10,]
+)
+mat.salmon.eg = filter(mat.salmon.eg, !is.na(salmon.achieved))
+mat.salmon.eg$mat = as.factor(mat.salmon.eg$mat)
+ggplot(mat.salmon.eg, aes(mat, salmon.achieved, fill = mat))+
+  geom_bar(stat = "identity")+
+  ylab("Salmon Achieved") +
+  xlab("Matriline")+
+  theme_bw()+
+  theme(
+    axis.text.x = element_text(size = 0),
+    axis.text.y = element_text(size = 30),
+    axis.title = element_text(size = 40),
+    legend.position = "none"
+  )

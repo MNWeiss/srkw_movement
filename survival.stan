@@ -9,8 +9,8 @@ data {
   int Niter;
   int Nyears;
   int Nmats;
-  real mat_salmon[Niter, Nyears, Nmats];
-  real mean_salmon[Nyears, Niter];
+  real mat_salmon[Nyears, Nmats];
+  real mean_salmon[Nyears];
   int mat_extant[Nyears, Nmats];
   
   vector[100] mean_salmon_seq;
@@ -41,7 +41,7 @@ model{
   for(i in 1:N){
     real p_i;
     if(mat_extant[year[i], mat[i]]){
-          p_i = Bage[age_cat[i]] + (Bmu_salmon[1]*mean_salmon[year[i]-1,1])+(Bmat_salmon[1]*mat_salmon[1,year[i]-1,mat[i]]);
+          p_i = Bage[age_cat[i]] + (Bmu_salmon[1]*mean_salmon[year[i]-1])+(Bmat_salmon[1]*mat_salmon[year[i]-1,mat[i]]);
           p[i] = inv_logit(p_i);
     }
 
@@ -69,3 +69,4 @@ generated quantities{
 
 
 }
+
