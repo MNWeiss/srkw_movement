@@ -66,6 +66,7 @@ social_data = list(
   N = nrow(matriline_data),
   mat_salmon = matriline_data$mat_salmon,
   social_var = zscore(matriline_data$pod.oldest),
+  pod = as.numeric(matriline_data$pod),
   
   output_n = 100,
   # outout_seq = 1:2
@@ -83,7 +84,7 @@ social.mod =
     cores = 4
   )
 
-traceplot(social.mod)
+traceplot(social.mod, pars = names(social.mod)[str_detect(names(social.mod), "post_mu", negate = TRUE)])
 precis(social.mod)
 
 post = extract(social.mod)
