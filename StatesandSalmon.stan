@@ -20,7 +20,7 @@ data {
 parameters {
   
   // Parameters of state model
-  real<lower = 0, upper = 1> pd2;
+  // real<lower = 0, upper = 1> pd2;
   real<lower = 0, upper = 1> pd3;
   simplex[3] rho[Y,M]; // Initial state
   real<lower = 0, upper = 0.5> parrive;
@@ -60,7 +60,7 @@ transformed parameters {
   t3[2] = 1 - pleave;
   
   mu[1] = 0;
-  mu[2] = pd2;
+  mu[2] = 1;
   mu[3] = pd3;
   
   // Build the transition matrix
@@ -91,7 +91,7 @@ model {
   // THE STATE MODEL
   
   //declare
-  pd2 ~ beta(49,1);
+  // pd2 ~ beta(49,1);
   pd3 ~ normal(0.25, 10); // Uniform priors seem to make it struggle to initialise. 
   parrive ~  normal(0.25, 10); 
   pleave ~ normal(0.25, 10); 

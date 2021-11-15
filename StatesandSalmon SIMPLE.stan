@@ -20,7 +20,7 @@ data {
 parameters {
   
   // Parameters of state model
-  real<lower = 0, upper = 1> pd2;
+  real<lower = 0.9, upper = 1> pd2;
   real<lower = 0, upper = 1> pd3;
   simplex[3] rho[Y,M]; // Initial state
   real<lower = 0, upper = 0.5> parrive;
