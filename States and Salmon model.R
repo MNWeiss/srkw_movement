@@ -38,8 +38,13 @@ mod_data <- list(
 )
 
 # set_cmdstan_path("C:/Users/mw607/cmdstan-2.28.1")
+<<<<<<< HEAD
 set_cmdstan_path("D:/cmdstan/cmdstan-2.28.1")
 # 
+=======
+# set_cmdstan_path("D:/cmdstan/cmdstan-2.28.1")
+
+>>>>>>> b8f115b8fdc4bfb5803ba7b961a9825fcf77b506
 mod <- cmdstan_model(
   stan_file = "StatesandSalmon SIMPLE.stan"
 )
@@ -47,12 +52,12 @@ mod <- cmdstan_model(
 # fit <- mod$sample(data = mod_data, iter_warmup = 250, iter_sampling = 250, parallel_chains = 4)
 
 ## THIS WORKS. 500 model outputs log_omega and y_sim
-fit <- mod$variational(data = mod_data, output_samples = 250)
+fit <- mod$variational(data = mod_data, output_samples = 200)
 
 post.draws <- fit$draws() %>%
   as_draws_df
 
-saveRDS(post.draws, "post.draws_var250.RDS")
+saveRDS(post.draws, "post.draws_var200.RDS")
 
 # stanfit <- rstan::read_stan_csv(fit$output_files())
 
