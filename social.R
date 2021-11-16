@@ -55,24 +55,41 @@ for(i in 1:nrow(matriline_data)){
   matriline_data$pod.oldest[i] = max(df$age_oldest)
 }
 
+
+## Add network measures
+source("Network Measures.R")
+
+matriline_data = 
+  left_join(matriline_data, network.measures.bymatriline)
+matriline_data = 
+  left_join(matriline_data, matnetwork.measures)
+
+
 ###############
 #Models
 ###########################
 
 zscore = function(x){(x-mean(x))/sd(x) }
 rev_zscore = function(x,y){(x*sd(y))+mean(y)}
+
+matriline_data = filter(matriline_data, !is.na(matbetween.scaled))
  
 social_data = list(
   N = nrow(matriline_data),
   mat_salmon = matriline_data$mat_salmon,
-  social_var = zscore(matriline_data$pod.oldest),
+  # social_var = zscore(matriline_data$pod.oldest),
+  social_var = matriline_data$matstrength.scaled,
   pod = as.numeric(matriline_data$pod),
   
   output_n = 100,
   # outout_seq = 1:2
-  output_seq = 
-    seq(quantile(zscore(matriline_data$pod.oldest), 0.05), 
-        quantile(zscore(matriline_data$pod.oldest), 0.95), 
+  # output_seq =
+  #   seq(quantile(zscore(matriline_data$pod.oldest), 0.05),
+  #       quantile(zscore(matriline_data$pod.oldest), 0.95),
+  #       length.out = 100)
+  output_seq =
+    seq(quantile(matriline_data$matstrength.scaled, 0.05),
+        quantile(matriline_data$matstrength.scaled, 0.95),
         length.out = 100)
 )
 
@@ -85,12 +102,13 @@ social.mod =
   )
 
 traceplot(social.mod, pars = names(social.mod)[str_detect(names(social.mod), "post_mu", negate = TRUE)])
-precis(social.mod)
+precis(social.mod, depth = 2, pars = names(social.mod)[str_detect(names(social.mod), "post_mu", negate = TRUE)])
 
 post = extract(social.mod)
 plot.df = 
   data.frame(
-    social.measure = rev_zscore(social_data$output_seq, matriline_data$pod.oldest),
+    # social.measure = rev_zscore(social_data$output_seq, matriline_data$pod.oldest),
+    social.measure = social_data$output_seq,
     p.mean = colMeans(post$post_mu),
     p.lCI90  = colQuantiles(post$post_mu, probs = 0.05),
     p.uCI90  = colQuantiles(post$post_mu, probs = 0.95),
@@ -113,3 +131,17 @@ ggplot(plot.df, aes(social.measure, p.mean))+
     legend.position = "none"
   )
 
+### Best plot
+ggplot(plot.df, aes(social.measure, p.mean))+
+  # geom_ribbon(aes(ymin = p.lCI90, ymax = p.uCI90), alpha  = 0.1, colour = NA) +
+  geom_ribbon(aes(ymin = p.lCI70, ymax = p.uCI70), alpha  = 0.2, colour = NA) +
+  geom_ribbon(aes(ymin = p.lCI50, ymax = p.uCI50), alpha  = 0.5, colour = NA) +
+  geom_line(size = 2)+
+  xlab("Matriline Connectedness")+
+  ylab("Salmon Achieved") +
+  theme_bw() +
+  theme(
+    axis.text = element_text(size = 30),
+    axis.title = element_text(size = 40),
+    legend.position = "none"
+  )
